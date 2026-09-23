@@ -75,4 +75,18 @@ def same_weight_session(previous: dict[str, Any], current: dict[str, Any]) -> bo
         return False
     if previous.get("unit") != current.get("unit"):
         return False
-    return abs(float(prev_w) - float(curr_w)) <= 0.2
+    if abs(float(prev_w) - float(curr_w)) > 0.2:
+        return False
+
+    prev_ts_raw = previous.get("timestamp")
+    curr_ts_raw = current.get("timestamp")
+    if not isinstance(prev_ts_raw, str) or not isinstance(curr_ts_raw, str):
+        return False
+
+    try:
+        prev_ts = datetime.fromisoformat(prev_ts_raw)
+        curr_ts = datetime.fromisoformat(curr_ts_raw)
+    except ValueError:
+        return False
+
+    return abs((curr_ts - prev_ts).total_seconds()) <= 30
